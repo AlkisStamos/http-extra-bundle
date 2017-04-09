@@ -21,6 +21,27 @@ Requirements
 
 The bundle uses value resolvers which were introduced in Symfony 3.1
 
+Installation
+-------------
+1. Installing the bundle via packagist
+```
+$ composer require alks/http-extra-bundle
+```
+2.Enable the bundle in your symfony project
+```php
+<?php
+// app/AppKernel.php
+
+public function registerBundles()
+{
+    $bundles = array(
+        // ...
+        new Alks\HttpExtraBundle\HttpExtraBundle(),
+        // ...
+    );
+}
+```
+
 Basic examples
 -------------
 Please note the examples below only demonstrate the bundles basic usage they are not suitable for proper application use.
