@@ -1,5 +1,5 @@
 {
-  "name": "alkstam/http-extra-bunlde",
+  "name": "alks/http-extra-bunlde",
   "description": "Addons to the symfony framework including controller argument binds to the request body/query, content negotiation and more",
   "type": "symfony-bundle",
   "keywords": ["rest","http","body","params","query"],
