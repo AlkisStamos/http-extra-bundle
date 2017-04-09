@@ -1,0 +1,52 @@
+services:
+
+    alks_http.jms_serializer:
+        class: Alks\HttpExtraBundle\Serializer\JMSSerializerAdapter
+        arguments: ["@jms_serializer.serializer"]
+        lazy: true
+        public: false
+
+    alks_http.jms_denormalizer:
+        class: Alks\HttpExtraBundle\Serializer\JMSDenormalizerAdapter
+        arguments: ["@jms_serializer.serializer"]
+        lazy: true,
+        public: false
+
+    alks_http.negotiator:
+        class: Alks\HttpExtraBundle\Negotiation\Negotiator
+        public: false
+
+    alks_http.configuration_resolver:
+        class: Alks\HttpExtraBundle\Resolver\ConfigurationResolver
+        arguments: ["@alks_http.negotiator"]
+        public: false
+
+    alks_http.action_listener:
+        class: Alks\HttpExtraBundle\EventListener\ActionListener
+        arguments: ["@annotations.reader", "@alks_http.configuration_resolver"]
+        calls:
+            - ["setSerializer":["@?alks_http.serializer"]]
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+            - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+            - { name: kernel.event_listener, event: kernel.view, method: onKernelView }
+
+    alks_http.action_param_value_resolver:
+        class: Alks\HttpExtraBundle\Resolver\ActionParamValueResolver
+        arguments: ["@alks_http.configuration_resolver", "@alks_http.action_listener"]
+        calls:
+            - ["setDenormalizer",["@?alks_http.denormalizer"]]
+            - ["setSerializer", ["@?alks_http.serializer"]]
+            - ["setDoctrineRegistry", ["@?doctrine"]]
+            - ["setValidator", ["@?validator"]]
+        tags:
+            - { name: controller.argument_value_resolver, priority: 50 }
+
+    alks_http.entity_param_converter:
+        class: Alks\HttpExtraBundle\EventListener\EntityParamConverter
+        arguments: ["@alks_http.action_listener"]
+        tags:
+            - { name: request.param_converter, converter: entity_param_converter, priority: 100 }
+
+    alks_http:
+        alias: alks_http.configuration_resolver
