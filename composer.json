@@ -21,7 +21,7 @@
 	"symfony/expression-language": "^3.0"
   },
   "autoload": {
-	"psr-0": {"Alks\\HttpExtraBundle\\": ""}
+	"psr-4": {"Alks\\HttpExtraBundle\\": ""}
   },
   "minimum-stability": "dev",
   "prefer-stable": true
