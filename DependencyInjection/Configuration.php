@@ -23,7 +23,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('alks_http');
+        $rootNode = $treeBuilder->root('alks_http_extra');
 
         $children = $rootNode->children();
         $headersNode = (new TreeBuilder())->root('headers')->addDefaultsIfNotSet();

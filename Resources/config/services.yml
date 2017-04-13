@@ -25,7 +25,7 @@ services:
         class: Alks\HttpExtraBundle\EventListener\ActionListener
         arguments: ["@annotations.reader", "@alks_http.configuration_resolver"]
         calls:
-            - ["setSerializer":["@?alks_http.serializer"]]
+            - ["setSerializer",["@?alks_http.serializer"]]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
             - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
@@ -35,7 +35,7 @@ services:
         class: Alks\HttpExtraBundle\Resolver\ActionParamValueResolver
         arguments: ["@alks_http.configuration_resolver", "@alks_http.action_listener"]
         calls:
-            - ["setDenormalizer",["@?alks_http.denormalizer"]]
+            - ["setDenormalizer", ["@?alks_http.denormalizer"]]
             - ["setSerializer", ["@?alks_http.serializer"]]
             - ["setDoctrineRegistry", ["@?doctrine"]]
             - ["setValidator", ["@?validator"]]
