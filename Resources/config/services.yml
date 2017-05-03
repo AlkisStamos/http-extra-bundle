@@ -50,3 +50,6 @@ services:
 
     alks_http:
         alias: alks_http.configuration_resolver
+
+    alks_http.context:
+        alias: alks_http.action_listener

@@ -1,6 +1,7 @@
 <?php
 
 namespace Alks\HttpExtraBundle\EventListener;
+use Alks\HttpExtraBundle\Annotation\ResponseHeader;
 use Doctrine\Common\Annotations\Reader;
 use Alks\HttpExtraBundle\Annotation\RequestParam;
 use Alks\HttpExtraBundle\Annotation\RequestParams;
@@ -48,6 +49,10 @@ class ActionListener
      * @var SerializerInterface
      */
     private $serializer;
+    /**
+     * @var array
+     */
+    private $responseContext;
 
     /**
      * ActionListener constructor.
@@ -59,6 +64,7 @@ class ActionListener
         $this->annotationReader = $annotationReader;
         $this->actionParameters = [];
         $this->responseParameters = [];
+        $this->responseContext = [];
         $this->configuration = $configuration;
         $this->serializer = null;
     }
@@ -158,7 +164,7 @@ class ActionListener
                 foreach($parameter->getHeaders() as $header)
                 {
                     $event->getResponse()->headers->add([
-                        $header->getName() => $header->getValue()
+                        $header->getName() => $this->resolveHeaderValue($header)
                     ]);
                 }
             }
@@ -202,5 +208,45 @@ class ActionListener
             'Content-Type' => $acceptType->getValue()
         ]);
         $event->setResponse($response);
+    }
+
+    /**
+     * Adds context key to the response context
+     *
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function response($key, $value)
+    {
+        $this->responseContext[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Resolves a header value according to the response context
+     *
+     * @param ResponseHeader $header
+     * @return string
+     */
+    private function resolveHeaderValue(ResponseHeader $header)
+    {
+        if(count($this->responseContext) > 0)
+        {
+            if(preg_match_all('/\[\((.*?)\\)]/', $header->getValue(), $values) > 0)
+            {
+                if(isset($values[1]))
+                {
+                    foreach($values[1] as $value)
+                    {
+                        if(isset($this->responseContext[$value]))
+                        {
+                            $header->setValue(str_replace('[('.$value.')]',$this->responseContext[$value],$header->getValue()));
+                        }
+                    }
+                }
+            }
+        }
+        return $header->getValue();
     }
 }

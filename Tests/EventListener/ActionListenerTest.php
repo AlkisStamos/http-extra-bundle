@@ -158,6 +158,32 @@ class ActionListenerTest extends TestCase
         $this->assertEquals($original,$response->headers->all());
     }
 
+    public function testKernelResponseWithContext()
+    {
+        $response = \Symfony\Component\HttpFoundation\Response::create();
+        $header = [
+            'name' => 'key',
+            'value' => '[(context1)]raw[(context1)]raw[(context2)]raw'
+        ];
+        $annotation = new Response([
+            'headers' => [
+                new ResponseHeader($header)
+            ]
+        ]);
+        $listener = new ActionListener($this->getReaderStub([$annotation]),$this->getConfigurationResolverMock());
+        $event = $this->createMock(FilterResponseEvent::class);
+        $event->expects($this->any())
+            ->method('getResponse')
+            ->willReturn($response);
+        $expected = 'value1rawvalue1rawvalue2raw';
+        $listener->response('context1','value1')
+            ->response('context2','value2');
+        $listener->onKernelController($this->getKernelControllerEventStub(new ControllerForActionListenerTest()));
+        $listener->onKernelResponse($event);
+        $this->assertArrayHasKey('key',$response->headers->all());
+        $this->assertSame($expected,$response->headers->get('key'));
+    }
+
     public function testKernelViewBind()
     {
         $controllerResponse = 'response';
