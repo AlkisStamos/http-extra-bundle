@@ -41,7 +41,7 @@ class ResponseHeader extends Annotation
     /**
      * @param string $value
      */
-    public function setValue(string $value)
+    public function setValue($value)
     {
         $this->value = $value;
     }
