@@ -77,3 +77,5 @@ class FooController extends \Symfony\Bundle\FrameworkBundle\Controller\Controlle
     }
 }
 ```
+
+Learn more about the bundle [here](Resources/doc/index.rst)
