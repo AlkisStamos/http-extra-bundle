@@ -24,6 +24,10 @@ class Response extends Annotation
      * @var array
      */
     protected $context;
+    /**
+     * @var int
+     */
+    protected $code;
 
     public function __construct(array $data)
     {
@@ -57,5 +61,13 @@ class Response extends Annotation
     public function getContext()
     {
         return $this->context;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->code;
     }
 }

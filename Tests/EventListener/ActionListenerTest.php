@@ -123,6 +123,36 @@ class ActionListenerTest extends TestCase
         $this->assertEquals([],$listener->getActionParameters());
     }
 
+    public function testKernelControllerWithMultipleResponses()
+    {
+        $response = \Symfony\Component\HttpFoundation\Response::create();
+        $type = 'json';
+        $header = 'application/json';
+        $statusCode = 200;
+        $validResponse = new Response(['type' => $type,'code'=>$statusCode]);
+        $extraResponse = new Response(['type' => 'xml','code'=>400]);
+        $reader = $this->getReaderStub([$validResponse,$extraResponse]);
+        $event = $this->getKernelControllerEventStub([ControllerForActionListenerTest::class,'action']);
+
+        $responseEvent = $this->createMock(FilterResponseEvent::class);
+        $responseEvent->expects($this->any())
+            ->method('getResponse')
+            ->willReturn($response);
+
+        $configuration = $this->getConfigurationResolverMock();
+        $configuration->expects($this->once())
+            ->method('getTypeFromKey')
+            ->with('json')
+            ->willReturn(new NegotiationResult($type,$header));
+
+        $listener = new ActionListener($reader,$configuration);
+        $listener->onKernelController($event);
+        $listener->onKernelResponse($responseEvent);
+        $this->assertTrue($response->headers->has('Content-Type'));
+        $this->assertSame($header, $response->headers->get('Content-Type'));
+        $this->assertSame($statusCode,$response->getStatusCode());
+    }
+
     public function testKernelResponseBind()
     {
         $headers = ['name'=>'foo','value'=>'bar'];
@@ -134,7 +164,7 @@ class ActionListenerTest extends TestCase
         ]);
         $listener = new ActionListener($this->getReaderStub([$annotation]),$this->getConfigurationResolverMock());
         $event = $this->createMock(FilterResponseEvent::class);
-        $event->expects($this->once())
+        $event->expects($this->exactly(2))
             ->method('getResponse')
             ->willReturn($response);
         $listener->onKernelController($this->getKernelControllerEventStub(new ControllerForActionListenerTest()));

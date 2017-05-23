@@ -36,11 +36,12 @@ class ActionListener
      */
     protected $actionParameters;
     /**
-     * Collection of response annotations
+     * The response annotation of the method (if any). If more than one are defined the listener will use the first one
+     * only.
      * 
-     * @var Response[]
+     * @var Response
      */
-    protected $responseParameters;
+    protected $responseParameter;
     /**
      * @var ConfigurationResolver
      */
@@ -63,7 +64,7 @@ class ActionListener
     {
         $this->annotationReader = $annotationReader;
         $this->actionParameters = [];
-        $this->responseParameters = [];
+        $this->responseParameter = null;
         $this->responseContext = [];
         $this->configuration = $configuration;
         $this->serializer = null;
@@ -142,32 +143,43 @@ class ActionListener
             {
                 $this->actionParameters[$annotation->getBindTo()] = $annotation;
             }
-            if($annotation instanceof Response)
+            if($annotation instanceof Response && $this->responseParameter === null)
             {
-                $this->responseParameters[] = $annotation;
+                $this->responseParameter = $annotation;
             }
         }
     }
 
     /**
-     * Binds the kernel response event. Will apply any response annotation references to the Response object
+     * Binds the kernel response event. Will apply the response annotation configuration to the Response object
      * 
      * 
      * @param FilterResponseEvent $event
      */
     public function onKernelResponse(FilterResponseEvent $event)
     {
-        foreach($this->responseParameters as $parameter)
+        if($this->responseParameter !== null)
         {
-            if($parameter->getHeaders() !== null)
+            if($this->responseParameter->getHeaders() !== null)
             {
-                foreach($parameter->getHeaders() as $header)
+                foreach($this->responseParameter->getHeaders() as $header)
                 {
                     $event->getResponse()->headers->add([
                         $header->getName() => $this->resolveHeaderValue($header)
                     ]);
                 }
             }
+            if($this->responseParameter->getType() !== null)
+            {
+                $type = $this->configuration->getTypeFromKey($this->responseParameter->getType());
+                if($type !== null)
+                {
+                    $event->getResponse()->headers->set('Content-Type',$type->getValue());
+                }
+            }
+            $event->getResponse()->setStatusCode(
+                $this->responseParameter->getCode() !== null ? $this->responseParameter->getCode() : 200
+            );
         }
     }
 
@@ -180,20 +192,19 @@ class ActionListener
     {
         $acceptType = null;
         $context= [];
-        if(count($this->responseParameters) > 0)
+        if($this->responseParameter !== null)
         {
-            $response = $this->responseParameters[0];
-            if($response->getType() !== null)
+            if($this->responseParameter->getType() !== null)
             {
-                $acceptType = $this->configuration->getTypeFromKey($response->getType());
+                $acceptType = $this->configuration->getTypeFromKey($this->responseParameter->getType());
                 if($acceptType === null)
                 {
-                    throw new \RuntimeException(sprintf('Response type "%s" cannot be resolved', $response->getType()));
+                    throw new \RuntimeException(sprintf('Response type "%s" cannot be resolved', $this->responseParameter->getType()));
                 }
             }
-            if($response->getContext() !== null)
+            if($this->responseParameter->getContext() !== null)
             {
-                $context = $response->getContext();
+                $context = $this->responseParameter->getContext();
             }
         }
         if($acceptType === null)

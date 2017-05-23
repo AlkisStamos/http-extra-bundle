@@ -131,3 +131,31 @@ to the serializer.
 
 Note that the annotation above forces a json response. If omitted and the negotiation option is enabled in the bundle,
 the User Entity will be serialized in the format negotiated by the Accept header of the request.
+
+Response Context
+----------------
+
+In order to use values from the controller to the response, the bundle includes a response context array in order to apply
+dynamic values to the response annotations. For example:
+
+.. code-block :: php
+
+    /**
+     * @Route("/comment", methods={"POST"})
+     * @RequestBody(bindTo="comment", validate=true)
+     * @Response(type="json", code=201, context={"groups":{"details"}}, headers={
+     *          @ResponseHeader(name="Location", value="[(location)]")
+     *     })
+     */
+    public function createCommentAction(Comment $comment, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($comment);
+        $em->flush();
+        $this->get('alks_http.context')->response('location','location',$request->getUri().'/'.$comment->getId());
+        return $comment;
+    }
+
+The above action would create a new Comment entry from the request body data. The response would be a json representation
+of the Comment entity with a 201 status code and would include a header Location with value the uri of the new created entry,
+containing the id of the comment. The bundle would replace the [(location)] value with the location from the response context.
