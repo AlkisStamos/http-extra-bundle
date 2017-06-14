@@ -14,6 +14,8 @@ The bundle also:
 which (if properly configured) leaves the controllers to work only with valid and structured request data. Useful when
 you like working with DTOs and you are not a big fan of forms.
 
+[![Build Status](https://travis-ci.org/AlkisStamos/http-extra-bundle.svg?branch=master)](https://travis-ci.org/AlkisStamos/http-extra-bundle)
+
 Requirements
 -------------
 * PHP 5.4 or higher
