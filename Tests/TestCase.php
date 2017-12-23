@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @package Alks\HttpExtraBundle\Tests
  * @author Alkis Stamos <stamosalkis@gmail.com>
  */
-class TestCase extends \PHPUnit_Framework_TestCase
+class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected function getTypes()
     {

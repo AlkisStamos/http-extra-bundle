@@ -51,7 +51,7 @@ class ActionParamValueResolverTest extends TestCase
         );
     }
 
-    private function getArgumentMetadata($name, $type=null, $isVariadic=null, $hasDefaultValue=false, $defaultValue=null, $isNullable=false)
+    private function getArgumentMetadata($name, $type=null, $isVariadic=false, $hasDefaultValue=false, $defaultValue=null, $isNullable=false)
     {
         return new ArgumentMetadata($name,$type,$isVariadic,$hasDefaultValue,$defaultValue,$isNullable);
     }
