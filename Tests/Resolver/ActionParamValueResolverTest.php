@@ -814,7 +814,7 @@ class ActionParamValueResolverTest extends TestCase
             'bindTo' => 'foo',
             'findBy' => 'name'
         ]);
-        $metadata = $this->getArgumentMetadata('foo','UnknownType',null,true,'baz');
+        $metadata = $this->getArgumentMetadata('foo','UnknownType',false,true,'baz');
         $repository = $this->createMock(ObjectRepository::class);
         $doctrine = $this->createMock(RegistryInterface::class);
         $this->testResolveRequestParamWithDoctrineRepository($param,$repository,$doctrine,$metadata);
